@@ -1,6 +1,8 @@
 package com.firstproject.controller;
 
 import com.firstproject.model.Article;
+import com.firstproject.model.Category;
+import com.firstproject.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +17,12 @@ import java.util.List;
 public class ArticleController {
 
     private final ArticleRepository articleRepository;
+    private final CategoryRepository categoryRepository;
 
-    public ArticleController(ArticleRepository articleRepository) {
+    public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository) {
         this.articleRepository = articleRepository;
+        this.categoryRepository = categoryRepository;
+
     }
 
     @GetMapping
@@ -40,10 +45,44 @@ public class ArticleController {
 
     @PostMapping
     public ResponseEntity<Article> createArticle(@RequestBody Article article) {
+
         article.setCreatedAt(LocalDateTime.now());
         article.setUpdatedAt(LocalDateTime.now());
+
+        if(article.getCategory() != null) {
+            Category category = categoryRepository.findById(article.getCategory().getId()).orElse(null);
+            if (category == null) {
+                return ResponseEntity.badRequest().body(null);
+            }
+            article.setCategory(category);
+        }
+
         Article savedArticle = articleRepository.save(article);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedArticle);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Article> updateArticle(@PathVariable Long id, @RequestBody Article articleDetails) {
+        Article article = articleRepository.findById(id).orElse(null);
+        if (article == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        article.setTitle(articleDetails.getTitle());
+        article.setContent(articleDetails.getContent());
+        article.setUpdatedAt(LocalDateTime.now());
+
+        // Mise à jour de la catégorie
+        if (articleDetails.getCategory() != null) {
+            Category category = categoryRepository.findById(articleDetails.getCategory().getId()).orElse(null);
+            if (category == null) {
+                return ResponseEntity.badRequest().body(null);
+            }
+            article.setCategory(category);
+        }
+
+        Article updatedArticle = articleRepository.save(article);
+        return ResponseEntity.ok(updatedArticle);
     }
 
     @DeleteMapping("/{id}")
