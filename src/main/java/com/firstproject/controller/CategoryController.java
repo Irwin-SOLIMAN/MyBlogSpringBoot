@@ -1,5 +1,5 @@
 package com.firstproject.controller;
-
+import com.firstproject.dto.CategoryDTO;
 import com.firstproject.model.Category;
 import com.firstproject.repository.CategoryRepository;
 import org.springframework.http.HttpStatus;
@@ -19,8 +19,8 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories() {
-        List<Category> categories= categoryRepository.findAll();
+    public ResponseEntity<List<CategoryDTO>> getAllCategories() {
+        List<CategoryDTO> categories= categoryRepository.findAll().stream().map(CategoryDTO::fromEntity).toList();
         if(categories.isEmpty()) {
             return ResponseEntity.noContent().build();
         }

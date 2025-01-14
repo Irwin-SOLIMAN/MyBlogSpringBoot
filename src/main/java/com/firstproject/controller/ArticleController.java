@@ -1,5 +1,6 @@
 package com.firstproject.controller;
 
+import com.firstproject.dto.ArticleDTO;
 import com.firstproject.model.Article;
 import com.firstproject.model.Category;
 import com.firstproject.repository.CategoryRepository;
@@ -11,6 +12,7 @@ import com.firstproject.repository.ArticleRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/articles")
@@ -22,29 +24,34 @@ public class ArticleController {
     public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository) {
         this.articleRepository = articleRepository;
         this.categoryRepository = categoryRepository;
-
     }
 
+
+    // Routter
+
     @GetMapping
-    public  ResponseEntity<List<Article>> getAllArticles() {
+    public  ResponseEntity<List<ArticleDTO>> getAllArticles() {
         List<Article> articles = articleRepository.findAll();
         if(articles.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(articles);
+
+        List<ArticleDTO> articlesDTO = articles.stream().map(ArticleDTO::fromEntity).toList();
+        // List<ArticleDTO> articlesDTO = articles.stream().map((i) -> ArticleDTO.fromEntity(i)).toList();
+        return ResponseEntity.ok(articlesDTO);
     }
 
     @GetMapping("/{id}")
-        public ResponseEntity<Article> getArticlesById(@PathVariable Long id) {
+        public ResponseEntity<ArticleDTO> getArticlesById(@PathVariable Long id) {
         Article article = articleRepository.findById(id).orElse(null);
         if(article == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(article);
+        return ResponseEntity.ok(ArticleDTO.fromEntity(article));
     }
 
     @PostMapping
-    public ResponseEntity<Article> createArticle(@RequestBody Article article) {
+    public ResponseEntity<ArticleDTO> createArticle(@RequestBody Article article) {
 
         article.setCreatedAt(LocalDateTime.now());
         article.setUpdatedAt(LocalDateTime.now());
@@ -58,7 +65,7 @@ public class ArticleController {
         }
 
         Article savedArticle = articleRepository.save(article);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedArticle);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ArticleDTO.fromEntity(article));
     }
 
     @PutMapping("/{id}")
