@@ -3,6 +3,8 @@ package com.firstproject.controller;
 import com.firstproject.dto.ArticleDTO;
 import com.firstproject.model.Article;
 import com.firstproject.model.Category;
+import com.firstproject.model.Image;
+import com.firstproject.repository.ImageRepository;
 import com.firstproject.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import com.firstproject.repository.ArticleRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,10 +23,13 @@ public class ArticleController {
 
     private final ArticleRepository articleRepository;
     private final CategoryRepository categoryRepository;
+    private final ImageRepository imageRepository;
 
-    public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository) {
+    // injection de class
+    public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository, ImageRepository imageRepository) {
         this.articleRepository = articleRepository;
         this.categoryRepository = categoryRepository;
+        this.imageRepository = imageRepository;
     }
 
 
@@ -64,6 +70,26 @@ public class ArticleController {
             article.setCategory(category);
         }
 
+        if (article.getImages() != null && !article.getImages().isEmpty()) {
+            List<Image> validImages = new ArrayList<>();
+            for (Image image : article.getImages()) {
+                if (image.getId() != null) {
+                    // Vérification des images existantes
+                    Image existingImage = imageRepository.findById(image.getId()).orElse(null);
+                    if (existingImage != null) {
+                        validImages.add(existingImage);
+                    } else {
+                        return ResponseEntity.badRequest().body(null);
+                    }
+                } else {
+                    // Création de nouvelles images
+                    Image savedImage = imageRepository.save(image);
+                    validImages.add(savedImage);
+                }
+            }
+            article.setImages(validImages);
+        }
+
         Article savedArticle = articleRepository.save(article);
         return ResponseEntity.status(HttpStatus.CREATED).body(ArticleDTO.fromEntity(article));
     }
@@ -93,14 +119,12 @@ public class ArticleController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteArticle(@PathVariable Long id) {
-
-        Article article = articleRepository.findById(id).orElse(null);
-        if (article == null) {
+    public ResponseEntity<Void> deleteImage(@PathVariable Long id) {
+        Image image = imageRepository.findById(id).orElse(null);
+        if (image == null) {
             return ResponseEntity.notFound().build();
         }
-
-        articleRepository.delete(article);
+        imageRepository.delete(image);
         return ResponseEntity.noContent().build();
     }
 

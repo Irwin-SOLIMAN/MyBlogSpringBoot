@@ -1,8 +1,10 @@
 package com.firstproject.dto;
 
 import com.firstproject.model.Article;
+import com.firstproject.model.Image;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ArticleDTO {
     private Long id;
@@ -10,6 +12,7 @@ public class ArticleDTO {
     private String content;
     private LocalDateTime updatedAt;
     private String categoryName;
+    private List<String> imageUrls;
 
     public ArticleDTO(Article article) {
         this.id = article.getId();
@@ -20,6 +23,9 @@ public class ArticleDTO {
             this.categoryName = article.getCategory().getName();
         } else {
             this.categoryName = "unknown";
+        }
+        if(article.getImages() != null) {
+            this.imageUrls = article.getImages().stream().map(Image::getUrl).toList();
         }
 
     }
@@ -55,6 +61,13 @@ public class ArticleDTO {
         this.content = content;
     }
 
+    public List<String> getImageUrls() {
+        return imageUrls;
+    }
+
+    public void setImageUrls(List<String> imageUrls) {
+        this.imageUrls = imageUrls;
+    }
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
