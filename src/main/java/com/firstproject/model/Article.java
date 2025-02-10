@@ -28,6 +28,9 @@ public class Article {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @OneToMany(mappedBy = "article") // permet de réaliser la jointure avec ArticleAuthor.
+    private List<ArticleAuthor> articleAuthors;
+
     @ManyToMany
     @JoinTable(
             name="article_image",
@@ -93,5 +96,13 @@ public class Article {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public List<ArticleAuthor> getArticleAuthors() {
+        return articleAuthors;
+    }
+
+    public void setArticleAuthors(List<ArticleAuthor> articleAuthors) {
+        this.articleAuthors = articleAuthors;
     }
 }
