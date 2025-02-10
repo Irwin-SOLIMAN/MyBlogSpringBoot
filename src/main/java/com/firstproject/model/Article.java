@@ -1,8 +1,9 @@
-package com.firstproject.firstproject.model;
+package com.firstproject.model;
 
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 public class Article {
@@ -22,6 +23,22 @@ public class Article {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @OneToMany(mappedBy = "article") // permet de réaliser la jointure avec ArticleAuthor.
+    private List<ArticleAuthor> articleAuthors;
+
+    @ManyToMany
+    @JoinTable(
+            name="article_image",
+            joinColumns = @JoinColumn(name="article_id"),
+            inverseJoinColumns = @JoinColumn(name="image_id")
+    )
+
+    private List<Image> images;
 
     // Getters et setters
 
@@ -45,8 +62,24 @@ public class Article {
         return content;
     }
 
+    public Category getCategory() {
+        return category;
+    }
+
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
+    public List<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Image> images) {
+        this.images = images;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -63,5 +96,13 @@ public class Article {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public List<ArticleAuthor> getArticleAuthors() {
+        return articleAuthors;
+    }
+
+    public void setArticleAuthors(List<ArticleAuthor> articleAuthors) {
+        this.articleAuthors = articleAuthors;
     }
 }
