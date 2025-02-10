@@ -1,7 +1,9 @@
 package com.firstproject.controller;
+
 import com.firstproject.dto.CategoryDTO;
 import com.firstproject.model.Category;
 import com.firstproject.repository.CategoryRepository;
+import com.firstproject.service.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,24 +14,25 @@ import java.util.List;
 @RequestMapping("/category")
 public class CategoryController {
 
-    private final CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
 
-    public CategoryController(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
+
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
     }
 
     @GetMapping
     public ResponseEntity<List<CategoryDTO>> getAllCategories() {
-        List<CategoryDTO> categories= categoryRepository.findAll().stream().map(CategoryDTO::fromEntity).toList();
-        if(categories.isEmpty()) {
+        List<CategoryDTO> categories = categoryService.getAllCategories();
+        if (categories.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(categories);
     }
 
     @PostMapping
-    public ResponseEntity<Category> createCategory(@RequestBody Category category) {
-        Category addedCategory = categoryRepository.save(category);
+    public ResponseEntity<CategoryDTO> createCategory(@RequestBody Category category) {
+        CategoryDTO addedCategory = categoryService.createCategory(category);
         return ResponseEntity.status(HttpStatus.CREATED).body(addedCategory);
     }
 }
