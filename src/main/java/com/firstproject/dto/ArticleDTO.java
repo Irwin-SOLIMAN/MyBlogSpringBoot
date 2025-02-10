@@ -1,88 +1,34 @@
 package com.firstproject.dto;
 
 import com.firstproject.model.Article;
+import com.firstproject.model.ArticleAuthor;
+import com.firstproject.model.Author;
 import com.firstproject.model.Image;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ArticleDTO {
-    private Long id;
-    private String title;
-    private String content;
-    private LocalDateTime updatedAt;
-    private String categoryName;
-    private List<String> imageUrls;
+public record ArticleDTO(
+        Long id,
+        String title,
+        String content,
+        LocalDateTime updatedAt,
+        String categoryName,
+        List<String> imageUrls,
+        List<AuthorDTO> authors
+) {
 
-    public ArticleDTO(Article article) {
-        this.id = article.getId();
-        this.title = article.getTitle();
-        this.content = article.getContent();
-        this.updatedAt = article.getUpdatedAt();
-        if(article.getCategory() != null) {
-            this.categoryName = article.getCategory().getName();
-        } else {
-            this.categoryName = "unknown";
-        }
-        if(article.getImages() != null) {
-            this.imageUrls = article.getImages().stream().map(Image::getUrl).toList();
-        }
-
-    }
-
-    // Method Static accessible sans instancier l'objet
     public static ArticleDTO fromEntity(Article article) {
-        return new ArticleDTO(article);
+
+        return new ArticleDTO(
+                        article.getId(),
+                        article.getTitle(),
+                        article.getContent(),
+                        article.getUpdatedAt(),
+                        article.getCategory() != null ? article.getCategory().getName() : "unknown",
+                        article.getImages() != null ? article.getImages().stream().map(Image::getUrl).toList() : null,
+                        article.getArticleAuthors() != null ? article.getArticleAuthors().stream().map((i) -> AuthorDTO.fromEntity(i.getAuthor())).toList() : null
+                );
     }
-
-    // Getters et setters
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public List<String> getImageUrls() {
-        return imageUrls;
-    }
-
-    public void setImageUrls(List<String> imageUrls) {
-        this.imageUrls = imageUrls;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
-    }
-
 }
+
