@@ -9,7 +9,6 @@ public record ImageDTO(Long id,
                        String url,
                        List<Long> articleIds
 
-
 ) {
 
 
