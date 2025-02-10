@@ -1,6 +1,7 @@
 package com.firstproject.service;
 
 import com.firstproject.dto.ImageDTO;
+import com.firstproject.exception.ResourceNotFoundException;
 import com.firstproject.model.Image;
 import com.firstproject.repository.ImageRepository;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class ImageService {
     }
 
     public ImageDTO getImageById(Long id) {
-        Image image = imageRepository.findById(id).orElse(null);
+        Image image = imageRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'image avec l'id " + id + " n'a pas été trouvé"));
         return ImageDTO.fromEntity(image);
     }
 
@@ -33,7 +34,7 @@ public class ImageService {
     }
 
     public ImageDTO updateImage(Long id, Image imageDetails) {
-        Image image = imageRepository.findById(id).orElse(null);
+        Image image = imageRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'image avec l'id " + id + " n'a pas été trouvé"));
         if (image == null) {
             return null;
         }
@@ -43,7 +44,7 @@ public class ImageService {
     }
 
     public boolean deleteImage(Long id) {
-        Image image = imageRepository.findById(id).orElse(null);
+        Image image = imageRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'image avec l'id " + id + " n'a pas été trouvé"));
         if (image == null) {
             return false;
         }

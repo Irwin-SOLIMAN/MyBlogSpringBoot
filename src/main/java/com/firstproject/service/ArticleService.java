@@ -1,5 +1,7 @@
 package com.firstproject.service;
+
 import com.firstproject.dto.ArticleDTO;
+import com.firstproject.exception.ResourceNotFoundException;
 import com.firstproject.model.*;
 import com.firstproject.repository.*;
 import org.springframework.stereotype.Service;
@@ -37,10 +39,8 @@ public class ArticleService {
     }
 
     public ArticleDTO getArticleById(Long id) {
-        Article article = articleRepository.findById(id).orElse(null);
-        if (article == null) {
-            return null;
-        }
+        Article article = articleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("L'article avec l'id " + id + " n'a pas été trouvé"));
         return ArticleDTO.fromEntity(article);
     }
 
@@ -50,7 +50,7 @@ public class ArticleService {
 
         // Gestion de la catégorie
         if (article.getCategory() != null) {
-            Category category = categoryRepository.findById(article.getCategory().getId()).orElse(null);
+            Category category = categoryRepository.findById(article.getCategory().getId()).orElseThrow(() -> new ResourceNotFoundException("La catégorie avec l'id " + article.getId() + " n'a pas été trouvé"));
             if (category == null) {
                 return null;
             }
@@ -62,7 +62,7 @@ public class ArticleService {
             List<Image> validImages = new ArrayList<>();
             for (Image image : article.getImages()) {
                 if (image.getId() != null) {
-                    Image existingImage = imageRepository.findById(image.getId()).orElse(null);
+                    Image existingImage = imageRepository.findById(image.getId()).orElseThrow(() -> new ResourceNotFoundException("L'image avec l'id " + image.getId() + " n'a pas été trouvé"));
                     if (existingImage != null) {
                         validImages.add(existingImage);
                     } else {
@@ -82,12 +82,12 @@ public class ArticleService {
         if (article.getArticleAuthors() != null) {
             for (ArticleAuthor articleAuthor : article.getArticleAuthors()) {
                 Author author = articleAuthor.getAuthor();
-                author = authorRepository.findById(author.getId()).orElse(null);
-                if (author == null) {
+                Author searchedAuthor = authorRepository.findById(author.getId()).orElseThrow(() -> new ResourceNotFoundException("L'auteur avec l'id " + author.getId() + " n'a pas été trouvé"));
+                if (searchedAuthor == null) {
                     return null;
                 }
 
-                articleAuthor.setAuthor(author);
+                articleAuthor.setAuthor(searchedAuthor);
                 articleAuthor.setArticle(savedArticle);
                 articleAuthor.setContribution(articleAuthor.getContribution());
 
@@ -99,7 +99,7 @@ public class ArticleService {
     }
 
     public ArticleDTO updateArticle(Long id, Article articleDetails) {
-        Article article = articleRepository.findById(id).orElse(null);
+        Article article = articleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'article avec l'id " + id + " n'a pas été trouvé"));
         if (article == null) {
             return null;
         }
@@ -109,7 +109,7 @@ public class ArticleService {
 
         // Mise à jour de la catégorie
         if (articleDetails.getCategory() != null) {
-            Category category = categoryRepository.findById(articleDetails.getCategory().getId()).orElse(null);
+            Category category = categoryRepository.findById(articleDetails.getCategory().getId()).orElseThrow(() -> new ResourceNotFoundException("La catégorie avec l'id " + id + " n'a pas été trouvé"));
             if (category == null) {
                 return null;
             }
@@ -121,7 +121,7 @@ public class ArticleService {
             List<Image> validImages = new ArrayList<>();
             for (Image image : articleDetails.getImages()) {
                 if (image.getId() != null) {
-                    Image existingImage = imageRepository.findById(image.getId()).orElse(null);
+                    Image existingImage = imageRepository.findById(image.getId()).orElseThrow(() -> new ResourceNotFoundException("L'image avec l'id " + id + " n'a pas été trouvé"));
                     if (existingImage != null) {
                         validImages.add(existingImage);
                     } else {
@@ -147,7 +147,7 @@ public class ArticleService {
 
             for (ArticleAuthor articleAuthorDetails : articleDetails.getArticleAuthors()) {
                 Author author = articleAuthorDetails.getAuthor();
-                author = authorRepository.findById(author.getId()).orElse(null);
+                author = authorRepository.findById(author.getId()).orElseThrow(() -> new ResourceNotFoundException("L'auteur avec l'id " + id + " n'a pas été trouvé"));
                 if (author == null) {
                     return null;
                 }
@@ -172,7 +172,7 @@ public class ArticleService {
     }
 
     public boolean deleteArticle(Long id) {
-        Article article = articleRepository.findById(id).orElse(null);
+        Article article = articleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'article avec l'id " + id + " n'a pas été trouvé"));
         if (article == null) {
             return false;
         }

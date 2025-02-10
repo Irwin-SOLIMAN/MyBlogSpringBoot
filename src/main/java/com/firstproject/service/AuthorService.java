@@ -1,9 +1,9 @@
 package com.firstproject.service;
 
 import com.firstproject.dto.AuthorDTO;
+import com.firstproject.exception.ResourceNotFoundException;
 import com.firstproject.model.Author;
 import com.firstproject.repository.AuthorRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class AuthorService {
     }
 
     public AuthorDTO getAuthorById(Long id) {
-        Author author = authorRepository.findById(id).orElse(null);
+        Author author = authorRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'auteur avec l'id " + id + " n'a pas été trouvé"));
         return AuthorDTO.fromEntity(author);
     }
 
