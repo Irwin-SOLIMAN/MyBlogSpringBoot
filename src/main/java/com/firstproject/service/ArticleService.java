@@ -1,6 +1,9 @@
 package com.firstproject.service;
 
+import com.firstproject.dto.ArticleCreateDTO;
 import com.firstproject.dto.ArticleDTO;
+import com.firstproject.dto.AuthorContributionDTOCreate;
+import com.firstproject.dto.ImageDTOCreate;
 import com.firstproject.exception.ResourceNotFoundException;
 import com.firstproject.model.*;
 import com.firstproject.repository.*;
@@ -44,52 +47,53 @@ public class ArticleService {
         return ArticleDTO.fromEntity(article);
     }
 
-    public ArticleDTO createArticle(Article article) {
-        article.setCreatedAt(LocalDateTime.now());
-        article.setUpdatedAt(LocalDateTime.now());
+    // Front : Evoie un article semi complet (create)
+    // Back : Vérifie que l'article envoyer corresond au minima requis (articleCreateDTO)
+    //        si ok, alors conversion en article
+
+    public ArticleDTO createArticle(ArticleCreateDTO articleCreateDTO) {
+
+        Article article = ArticleCreateDTO.fromEntity(articleCreateDTO);
 
         // Gestion de la catégorie
-        if (article.getCategory() != null) {
-            Category category = categoryRepository.findById(article.getCategory().getId()).orElseThrow(() -> new ResourceNotFoundException("La catégorie avec l'id " + article.getId() + " n'a pas été trouvé"));
-            if (category == null) {
-                return null;
-            }
-            article.setCategory(category);
+        if (articleCreateDTO.categoryId() != null) {
+            Category category = categoryRepository.findById(articleCreateDTO.categoryId()).orElseThrow(() -> new ResourceNotFoundException("La catégorie avec l'id " + article.getId() + " n'a pas été trouvé"));
+            article.setCategory(category); // en récupérant l'objet catégorie de la BDD, cela permet à hibernate de faire le lien
         }
 
         // Gestion des images
-        if (article.getImages() != null && !article.getImages().isEmpty()) {
+        if (articleCreateDTO.images() != null) {
             List<Image> validImages = new ArrayList<>();
-            for (Image image : article.getImages()) {
-                if (image.getId() != null) {
-                    Image existingImage = imageRepository.findById(image.getId()).orElseThrow(() -> new ResourceNotFoundException("L'image avec l'id " + image.getId() + " n'a pas été trouvé"));
+            for (ImageDTOCreate imageDTOCreate : articleCreateDTO.images()) {
+                if (imageDTOCreate.id() != null) {
+                    Image existingImage = imageRepository.findById(imageDTOCreate.id()).orElse(null);
                     if (existingImage != null) {
                         validImages.add(existingImage);
                     } else {
-                        return null;
+                        throw new ResourceNotFoundException("L'image avec l'id " + imageDTOCreate.id() + " n'a pas été trouvé");
                     }
                 } else {
-                    Image savedImage = imageRepository.save(image);
+                    Image imageToSave = ImageDTOCreate.fromEntity(imageDTOCreate);
+                    Image savedImage = imageRepository.save(imageToSave);
                     validImages.add(savedImage);
                 }
             }
-            article.setImages(validImages);
+            article.setImages(validImages); // possible car on a récupérer de la BDD l'objet ou il a été persisité juste avant
         }
 
         Article savedArticle = articleRepository.save(article);
 
         // Gestion des auteurs
-        if (article.getArticleAuthors() != null) {
-            for (ArticleAuthor articleAuthor : article.getArticleAuthors()) {
-                Author author = articleAuthor.getAuthor();
-                Author searchedAuthor = authorRepository.findById(author.getId()).orElseThrow(() -> new ResourceNotFoundException("L'auteur avec l'id " + author.getId() + " n'a pas été trouvé"));
-                if (searchedAuthor == null) {
-                    return null;
-                }
+        if (articleCreateDTO.authors() != null) {
+            for (AuthorContributionDTOCreate authorContributionDTOCreate : articleCreateDTO.authors()) {
+
+                Author searchedAuthor = authorRepository.findById(authorContributionDTOCreate.authorId()).orElseThrow(() -> new ResourceNotFoundException("L'auteur avec l'id " + authorContributionDTOCreate.authorId() + " n'a pas été trouvé"));
+
+                ArticleAuthor articleAuthor = new ArticleAuthor();
 
                 articleAuthor.setAuthor(searchedAuthor);
                 articleAuthor.setArticle(savedArticle);
-                articleAuthor.setContribution(articleAuthor.getContribution());
+                articleAuthor.setContribution(authorContributionDTOCreate.contribution());
 
                 articleAuthorRepository.save(articleAuthor);
             }

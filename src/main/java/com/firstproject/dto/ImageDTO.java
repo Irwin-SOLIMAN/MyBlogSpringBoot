@@ -2,6 +2,7 @@ package com.firstproject.dto;
 
 import com.firstproject.model.Article;
 import com.firstproject.model.Image;
+import org.hibernate.validator.constraints.URL;
 
 import java.util.List;
 

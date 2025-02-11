@@ -1,11 +1,14 @@
 package com.firstproject.controller;
 
+import com.firstproject.dto.ArticleCreateDTO;
 import com.firstproject.dto.ArticleDTO;
 
+import com.firstproject.exception.ResourceNotFoundException;
 import com.firstproject.model.Article;
 
 import com.firstproject.service.ArticleService;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,17 +45,14 @@ public class ArticleController {
     }
 
     @PostMapping
-    public ResponseEntity<ArticleDTO> createArticle(@RequestBody Article article) {
-        ArticleDTO savedArticle = articleService.createArticle(article);
+    public ResponseEntity<ArticleDTO> createArticle(@Valid @RequestBody ArticleCreateDTO articleCreateDTO) {
+        ArticleDTO savedArticle = articleService.createArticle(articleCreateDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedArticle);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ArticleDTO> updateArticle(@PathVariable Long id, @RequestBody Article articleDetails) {
         ArticleDTO updatedArticle = articleService.updateArticle(id, articleDetails);
-        if (updatedArticle == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(updatedArticle);
     }
 
