@@ -15,6 +15,7 @@ public record ImageDTOCreate(Long id,
     public static Image fromEntity(ImageDTOCreate imageDTOCreate) {
         Image image = new Image();
         image.setUrl(imageDTOCreate.url());
+
         return image;
     }
 
