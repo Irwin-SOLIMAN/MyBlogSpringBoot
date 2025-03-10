@@ -1,7 +1,9 @@
 package com.firstproject.controller;
 
+import com.firstproject.dto.UserLoginDTO;
 import com.firstproject.dto.UserRegistrationDTO;
 import com.firstproject.model.User;
+import com.firstproject.service.AuthenticationService;
 import com.firstproject.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,11 @@ import java.util.Set;
 @RequestMapping("/auth")
 public class AuthController {
     private final UserService userService;
+    private final AuthenticationService authenticationService;
 
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, AuthenticationService authenticationService) {
         this.userService = userService;
+        this.authenticationService = authenticationService;
     }
 
     @PostMapping("/register")
@@ -30,4 +34,15 @@ public class AuthController {
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> authenticate(@RequestBody UserLoginDTO userLoginDTO) {
+        String token = authenticationService.authenticate(
+                userLoginDTO.getEmail(),
+                userLoginDTO.getPassword()
+        );
+        return ResponseEntity.ok(token);
+    }
 }
+
+
