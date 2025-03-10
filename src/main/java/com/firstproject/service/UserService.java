@@ -1,5 +1,6 @@
 package com.firstproject.service;
 
+import com.firstproject.exception.ResourceNotFoundException;
 import com.firstproject.model.User;
 import com.firstproject.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,5 +30,10 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(password)); // Encodage du mot de passe avec BCrypt
         user.setRoles(roles);
         return userRepository.save(user);
+    }
+
+    public User findById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("user not found"));
+        return user;
     }
 }
